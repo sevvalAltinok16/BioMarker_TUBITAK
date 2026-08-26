@@ -28,7 +28,7 @@ aims to consolidate all these analyses into a single open-source platform.
 
 ## Repo Structre
 
-'''
+
 biomarker/
 ├── data/                  # Pilot dataset (protein metadata, FASTA, etc.)
 ├── docs/                  # Selection criteria, data dictionary, methodology
@@ -40,7 +40,7 @@ biomarker/
 │   └── gui/               # PyQt5 Interface
 ├── tests/                 # Unit tests
 └── notebooks/             # Exploratory data analysis
-'''
+
 
 ## Technologies Used
 
