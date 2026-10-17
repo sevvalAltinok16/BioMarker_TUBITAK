@@ -29,17 +29,21 @@ aims to consolidate all these analyses into a single open-source platform.
 ## Repo Structre
 
 
+## Repo Structure
+
+```text
 biomarker/
-├── data/                  # Pilot dataset (protein metadata, FASTA, etc.)
-├── docs/                  # Selection criteria, data dictionary, methodology
-├── src/biomarker/         # Main software package
-│   ├── data\\\\\\\_io/           # Data entry, validation, UniProt retrieval
-│   ├── analysis/          # Physicochemical, hydropathy, secondary structure, motif, BLAST
-│   ├── visualization/     # Static + interactive graphics, 3D structure visualization
-│   ├── reporting/         # PDF report generation
-│   └── gui/               # PyQt5 Interface
-├── tests/                 # Unit tests
-└── notebooks/             # Exploratory data analysis
+├── data/ # Pilot dataset (protein metadata, FASTA, etc.)
+├── docs/ # Selection criteria, data dictionary, methodology
+├── src/biomarker/ # Main software package
+│   ├── data_io/ # Data entry, validation, UniProt retrieval
+│   ├── analysis/ # Physicochemical, hydropathy, secondary structure, motif, BLAST
+│   ├── visualization/ # Static + interactive graphics, 3D structure visualization
+│   ├── reporting/ # PDF report generation
+│   └── gui/ # PyQt5 Interface
+├── tests/ # Unit tests
+└── notebooks/ # Exploratory data analysis
+```
 
 
 ## Technologies Used
