@@ -6,8 +6,6 @@ It is being developed under the TÜBİTAK 2209-A Support Program for University 
 
 ## Project Summary
 
-## Project Summary
-
 Protein analyses today typically require a fragmented workflow: a web tool for physicochemical properties, another site for hydropathy, and different servers for motif scanning and homology analysis, etc.
 
 BioMarker aims to consolidate all these analyses into a single open-source platform.
