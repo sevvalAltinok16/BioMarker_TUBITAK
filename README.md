@@ -6,19 +6,17 @@ It is being developed under the TÜBİTAK 2209-A Support Program for University 
 
 ## Project Summary
 
-Protein analyses today typically require a fragmented workflow:
+## Project Summary
 
-a web tool for physicochemical properties, another site for hydropathy,
+Protein analyses today typically require a fragmented workflow: a web tool for physicochemical properties, another site for hydropathy, and different servers for motif scanning and homology analysis, etc.
 
-and different servers for motif scanning and homology analysis etc. BioMarker
-
-aims to consolidate all these analyses into a single open-source platform.
+BioMarker aims to consolidate all these analyses into a single open-source platform.
 
 ## Project Status (Last Update: August 2026)
 
 * \[x] **Phase 0 — Pilot Veri Seti:** Metadata for 20 proteins, FASTA, selection criteria, and the source manifest have been completed.
-* \[ ] **Phase 1 (Week 1-2):** Literature review and technological infrastructure research
-* \[ ] **Phase 2 (Week 3-4):** Physicochemical profile + Hydropathy modules
+* \[x] **Phase 1 (Week 1-2):** Literature review and technological infrastructure research
+* \[x] **Phase 2 (Week 3-4):** Physicochemical profile + Hydropathy modules
 * \[ ] **Phase 3 (Week 5-6):** Chou-Fasman secondary structure estimation
 * \[ ] **Phase 4 (Week 7-9):** PyQt5 graphical user interface (GUI)
 * \[ ] **Phase 5 (Week 10-12):** Motif scanning (PROSITE) + BLAST homology analysis
@@ -69,13 +67,9 @@ pip install -r requirements.txt
 
 ## About Dataset
 
-The pilot dataset contains 20 proteins; for each, the UniProt ID, gene name,
+The pilot dataset contains 20 proteins; for each, the UniProt ID, gene name, family, cellular localization, PDB ID, PROSITE ID, sequence, molecular weight, and more are recorded. 
 
-family, cellular localization, PDB ID, PROSITE ID, sequence, molecular
-
-weight, and more are recorded. Please refer to the 'docs/data\_dictionary.xlsx'
-
-and 'docs/selection\_criteria.md' files for details.
+Please refer to the `docs/data_dictionary.xlsx` and `docs/selection_criteria.md` files for details.
 
 ## Licence
 
