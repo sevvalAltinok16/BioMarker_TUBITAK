@@ -10,7 +10,7 @@ Protein analyses today typically require a fragmented workflow: a web tool for p
 
 BioMarker aims to consolidate all these analyses into a single open-source platform.
 
-## Project Status (Last Update: August 2026)
+## Project Status (Last Update: October 2026)
 
 * \[x] **Phase 0 — Pilot Veri Seti:** Metadata for 20 proteins, FASTA, selection criteria, and the source manifest have been completed.
 * \[x] **Phase 1 (Week 1-2):** Literature review and technological infrastructure research
