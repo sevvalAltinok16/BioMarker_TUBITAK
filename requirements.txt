@@ -1,11 +1,20 @@
+<<<<<<< HEAD
 PyQt5>=5.15
 PyQtWebEngine
 pyqtgraph
+=======
+>>>>>>> e83bb11a79b756f2d606b241a15fb9a91e6091f6
 biopython>=1.81
 numpy>=1.24
 pandas>=2.0
 matplotlib>=3.7
 seaborn>=0.12
 plotly>=5.15
+<<<<<<< HEAD
 weasyprint>=59.0
 pytest>=7.4
+=======
+PyQt5>=5.15
+weasyprint>=59.0
+pytest>=7.4
+>>>>>>> e83bb11a79b756f2d606b241a15fb9a91e6091f6

@@ -1,0 +1,21 @@
+BioMarker_ID;UniProt_Accession;Source_Database;Source_URL;Retrieval_Method;Retrieval_Date;Retrieved_By;File_Format
+B0001;O08762;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/O08762;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0002;A4D126;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/A4D126;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0003;P21673;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P21673;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0004;R9RZK8;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/R9RZK8;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0005;O43312;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/O43312;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0006;P32458;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P32458;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0007;Q96SW2;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q96SW2;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0008;Q96BZ9;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q96BZ9;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0009;P15514;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P15514;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0010;D2IYS2;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/D2IYS2;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0011;P02774;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P02774;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0012;O00300;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/O00300;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0013;P11916;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P11916;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0014;Q62735;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q62735;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0015;P18858;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P18858;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0016;Q96G21;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q96G21;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0017;Q9SJQ9;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q9SJQ9;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0018;Q9NUB1;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q9NUB1;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0019;P0ABD3;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/P0ABD3;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
+B0020;Q6C2E3;UniProtKB/Swiss-Prot;https://www.uniprot.org/uniprotkb/Q6C2E3;REST API;16.08.2026;Þevvalnur ALTINOK;JSON/FASTA
