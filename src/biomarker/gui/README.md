@@ -3,15 +3,11 @@
 
 **State:** In the development phase
 
-BioMarker is a desktop-based bioinformatics analysis tool designed to calculate physicochemical properties, hydropathy profiles, secondary structure predictions, and motif analysis from protein sequences.
-
-
 ## Design & Theme Guidelines
 * **Architecture:** PyQt5-based clean, modern, and scientific user interface
 * **Theme Support:** System-adaptive **Light** and **Dark** themes
 
-
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 | Shortcut | Action |
 | :--- | :--- |
 | **F5** | Start analysis[cite: 7] |
