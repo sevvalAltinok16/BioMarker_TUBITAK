@@ -10,11 +10,11 @@
 ## Keyboard Shortcuts
 | Shortcut | Action |
 | :--- | :--- |
-| **F5** | Start analysis[cite: 7] |
-| **Ctrl+N** | New analysis tab[cite: 7] |
-| **Ctrl+O** | Import FASTA file[cite: 4, 7] |
-| **Ctrl+S** | Save project[cite: 4, 7] |
-| **Ctrl+E** | Export PDF report[cite: 4, 7] |
+| **F5** | Start analysis|
+| **Ctrl+N** | New analysis tab|
+| **Ctrl+O** | Import FASTA file|
+| **Ctrl+S** | Save project|
+| **Ctrl+E** | Export PDF report|
 
 ## GUI Architecture
 ```text
