@@ -5,7 +5,7 @@ COMMON = {
     "sidebar_bg": "#1E152A",
     "sidebar_text": "#D9CFEA",
     "sidebar_hover": "#36224E",
-    "primary": "#2A1B3D",
+    "primary": "#8A2BE2",
     "primary_text": "#FFFFFF",
     "accent": "#A855F7",      # grafik çizgisi, heliks
     "helix": "#A855F7",
@@ -26,12 +26,13 @@ MODES = {
         "text": "#1E152A",
         "muted": "#6B7280",
         "border": "#E4DDF0",
-        "tabrow_bg": "#EDE7F6",
+        "tabrow_bg": "#2A1B3D",
         "pill_on": "#E9DDF7",
+        "link": "#2563EB",
         "pill_on_text": "#1E152A",
         "drag_bg": "#E9DDF7",
     },
-        "dark": {
+    "dark": {
         "bg": "#161616",
         "card": "#1C1C1C",
         "text": "#F3EEFA",
@@ -39,6 +40,7 @@ MODES = {
         "border": "#2E2E2E",
         "tabrow_bg": "#2A1B3D",
         "pill_on": "#EDE7FB",
+        "link": "#60A5FA",
         "pill_on_text": "#1E152A",
         "drag_bg": "#2A1B3D",
     },
@@ -49,8 +51,37 @@ def tokens(mode: str) -> dict:
     return {**COMMON, **MODES[mode]}
 
 
+_CHECK_PATH = None
+
+
+def _check_icon_path() -> str:
+    """Onay kutusu için ✓ simgesini bir kez çizip geçici klasöre kaydeder."""
+    global _CHECK_PATH
+    if _CHECK_PATH:
+        return _CHECK_PATH
+    import os
+    import tempfile
+    from PyQt5.QtCore import Qt, QPointF
+    from PyQt5.QtGui import QColor, QPainter, QPen, QPixmap
+    pm = QPixmap(16, 16)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    pen = QPen(QColor("#FFFFFF"), 2)
+    pen.setCapStyle(Qt.RoundCap)
+    pen.setJoinStyle(Qt.RoundJoin)
+    p.setPen(pen)
+    p.drawPolyline(QPointF(3.8, 8.4), QPointF(6.8, 11.4), QPointF(12.2, 4.8))
+    p.end()
+    path = os.path.join(tempfile.gettempdir(), "biomarker_check.png")
+    pm.save(path)
+    _CHECK_PATH = path.replace("\\", "/")
+    return _CHECK_PATH
+
+
 def build_qss(mode: str) -> str:
     t = tokens(mode)
+    check = _check_icon_path()
     return f"""
 * {{ font-size: 13px; }}
 QMainWindow, QWidget#workspace, QStackedWidget {{
@@ -136,6 +167,55 @@ QFrame#dropzone {{
 }}
 QFrame#dropzone[drag="true"] {{ background: {t['drag_bg']}; }}
 QFrame#dropzone QLabel {{ color: {t['text']}; }}
+
+/* Özet ekranı */
+QLabel#metric {{ font-size: 18px; font-weight: 500; }}
+QLabel#badge {{
+    background: {t['pill_on']}; color: {t['pill_on_text']};
+    border-radius: 6px; padding: 4px 10px;
+}}
+QPushButton#link {{
+    background: transparent; color: {t['link']};
+    border: none; padding: 0; font-size: 12px;
+}}
+QPushButton#link:hover {{ color: {t['text']}; }}
+
+/* Fizikokimyasal ekranı */
+QScrollArea {{ background: transparent; border: none; }}
+QComboBox, QSpinBox {{
+    background: {t['bg']}; color: {t['text']};
+    border: 1px solid {t['border']}; border-radius: 6px;
+    padding: 4px 8px; min-height: 20px;
+}}
+QComboBox:hover, QSpinBox:hover {{ border-color: {t['primary']}; }}
+QComboBox::drop-down {{ border: none; width: 20px; }}
+QComboBox QAbstractItemView {{
+    background: {t['card']}; color: {t['text']}; border: 1px solid {t['border']};
+    selection-background-color: {t['primary']}; selection-color: {t['primary_text']};
+}}
+QScrollBar:vertical {{ background: transparent; width: 10px; }}
+QScrollBar::handle:vertical {{ background: {t['border']}; border-radius: 5px; min-height: 24px; }}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
+
+/* İkincil yapı ekranı */
+QCheckBox {{ color: {t['text']}; spacing: 6px; background: transparent; }}
+QCheckBox::indicator {{
+    width: 16px; height: 16px; border: 1px solid {t['border']};
+    border-radius: 4px; background: {t['bg']};
+}}
+QCheckBox::indicator:checked {{
+    background: {t['primary']}; border-color: {t['primary']}; image: url({check});
+}}
+QTableWidget {{
+    background: transparent; border: none; color: {t['text']}; outline: 0;
+    selection-background-color: {t['pill_on']}; selection-color: {t['pill_on_text']};
+}}
+QTableWidget::item {{ padding: 0 8px; border-bottom: 1px solid {t['border']}; }}
+QHeaderView {{ background: transparent; }}
+QHeaderView::section {{
+    background: transparent; color: {t['muted']}; border: none;
+    border-bottom: 1px solid {t['border']}; padding: 0 8px; text-align: left;
+}}
 
 /* Durum çubuğu */
 QStatusBar {{ background: {t['sidebar_bg']}; color: {t['sidebar_text']}; }}

@@ -21,3 +21,12 @@ Thumbs.db
 output/
 *.pdf
 !docs/**/*.pdf
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+bin/
+obj/

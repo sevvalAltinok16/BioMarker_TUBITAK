@@ -6,14 +6,19 @@ from PyQt5.QtWidgets import (
     QActionGroup, QApplication,
 )
 
+import analysis
 import theme
+from fiziko_page import FizikoPage
 from giris_page import GirisPage
+from ikincil_page import IkincilPage
+from motif_page import MotifPage
+from ozet_page import OzetPage
 
 # (anahtar, etiket, analiz gerektirir mi)
 NAV_ITEMS = [
     ("giris", "Giriş", False),
     ("gecmis", "Geçmiş", False),
-    ("fizikokimya", "Fizikokimyasal", True),
+    ("fizikokimya", "Fizikokim.", True),
     ("ikincil", "İkincil yapı", True),
     ("motif", "Motif", True),
     ("homoloji", "Homoloji", True),
@@ -59,8 +64,8 @@ class MainWindow(QMainWindow):
         mb = self.menuBar()
 
         m_file = mb.addMenu("Dosya")
-        self.act_new = self._action(m_file, "Yeni analiz", "Ctrl+N", self.new_tab)
-        self._action(m_file, "FASTA içe aktar", "Ctrl+O", lambda: self.giris.open_file_dialog())
+        self._action(m_file, "Yeni analiz", "Ctrl+N", self.new_tab)
+        self._action(m_file, "FASTA içe aktar", "Ctrl+O", self.import_fasta)
         self._action(m_file, "Projeyi kaydet", "Ctrl+S")
         self._action(m_file, "Raporu dışa aktar", "Ctrl+E")
 
@@ -83,10 +88,10 @@ class MainWindow(QMainWindow):
         self._action(m_help, "Belgeler")
         self._action(m_help, "Hakkında")
 
-        # F5: Analiz et (şimdilik bağlı değil)
+        # F5: yalnızca Giriş ekranındayken analiz başlatır
         self.act_run = QAction("Analiz et", self)
         self.act_run.setShortcut(QKeySequence("F5"))
-        self.act_run.triggered.connect(lambda _=False: self.giris.submit())
+        self.act_run.triggered.connect(self.run_shortcut)
         self.addAction(self.act_run)
 
     def _action(self, menu, text, shortcut=None, slot=None):
@@ -117,6 +122,7 @@ class MainWindow(QMainWindow):
         self.tabbar.setExpanding(False)
         self.tabbar.setDrawBase(False)
         self.tabbar.tabCloseRequested.connect(self.close_tab)
+        self.tabbar.currentChanged.connect(self.refresh_for_tab)
         plus = QToolButton()
         plus.setObjectName("newTab")
         plus.setText("+")
@@ -126,20 +132,36 @@ class MainWindow(QMainWindow):
         rl.addStretch(1)
         col.addWidget(row)
 
-        # sidebar + sayfalar
-        body = QHBoxLayout()
-        body.setContentsMargins(0, 0, 0, 0)
-        body.setSpacing(0)
-        body.addWidget(self._build_sidebar())
+        # sayfalar: önce NAV_ITEMS sırasıyla, sonra Ayarlar, en sonda Özet
         self.stack = QStackedWidget()
+        self.page_index = {}
         for key, label, _ in NAV_ITEMS:
             if key == "giris":
                 self.giris = GirisPage()
                 self.giris.analyze_requested.connect(self.on_analyze)
-                self.stack.addWidget(self.giris)
+                page = self.giris
+            elif key == "motif":
+                self.motif = MotifPage()
+                self.motif.show_in_3d.connect(self.on_show_in_3d)
+                page = self.motif
+            elif key == "ikincil":
+                self.ikincil = IkincilPage()
+                page = self.ikincil
+            elif key == "fizikokimya":
+                self.fiziko = FizikoPage()
+                page = self.fiziko
             else:
-                self.stack.addWidget(PlaceholderPage(label))
-        self.stack.addWidget(PlaceholderPage("Ayarlar"))
+                page = PlaceholderPage(label)
+            self.page_index[key] = self.stack.addWidget(page)
+        self.page_index["ayarlar"] = self.stack.addWidget(PlaceholderPage("Ayarlar"))
+        self.ozet = OzetPage()
+        self.ozet.navigate.connect(self.go)
+        self.page_index["ozet"] = self.stack.addWidget(self.ozet)
+
+        body = QHBoxLayout()
+        body.setContentsMargins(0, 0, 0, 0)
+        body.setSpacing(0)
+        body.addWidget(self._build_sidebar())
         body.addWidget(self.stack, 1)
         col.addLayout(body, 1)
 
@@ -160,8 +182,11 @@ class MainWindow(QMainWindow):
         self.nav_group = QButtonGroup(self)
         self.nav_group.setExclusive(True)
         self.nav_buttons = {}
-        for i, (key, label, needs_analysis) in enumerate(NAV_ITEMS):
-            lay.addWidget(self._nav_button(i, key, label, needs_analysis))
+        self.needs_analysis = []
+        for i, (key, label, needs) in enumerate(NAV_ITEMS):
+            lay.addWidget(self._nav_button(i, key, label, needs))
+            if needs:
+                self.needs_analysis.append(key)
         lay.addStretch(1)
         lay.addWidget(self._nav_button(len(NAV_ITEMS), "ayarlar", "Ayarlar", False))
 
@@ -176,7 +201,10 @@ class MainWindow(QMainWindow):
         b.setEnabled(not needs_analysis)  # analiz yapılana kadar soluk
         self.nav_group.addButton(b, index)
         self.nav_buttons[key] = b
-        b.clicked.connect(lambda _=False, i=index: self.stack.setCurrentIndex(i))
+        if key == "giris":
+            b.clicked.connect(lambda _=False: self.show_home())
+        else:
+            b.clicked.connect(lambda _=False, k=key: self.go(k))
         return b
 
     # ---------- durum çubuğu ----------
@@ -188,14 +216,87 @@ class MainWindow(QMainWindow):
         sb.addWidget(self.status_left, 1)
         sb.addPermanentWidget(self.status_right)
 
+    # ---------- gezinme ----------
+    def go(self, key):
+        self.stack.setCurrentIndex(self.page_index[key])
+        self.nav_buttons[key].setChecked(True)
+
+    def current_result(self):
+        i = self.tabbar.currentIndex()
+        return self.tabbar.tabData(i) if i >= 0 else None
+
+    def show_home(self):
+        """Analiz yoksa Giriş, varsa Özet."""
+        if self.current_result() is not None:
+            self.stack.setCurrentIndex(self.page_index["ozet"])
+        else:
+            self.stack.setCurrentIndex(self.page_index["giris"])
+        self.nav_buttons["giris"].setChecked(True)
+
+    def refresh_for_tab(self, *_):
+        """Sekme değişince sidebar ve sayfayı o sekmenin durumuna göre ayarla."""
+        res = self.current_result()
+        has = res is not None
+        self.nav_buttons["giris"].setText("Özet" if has else "Giriş")
+        for key in self.needs_analysis:
+            self.nav_buttons[key].setEnabled(has)
+        if has:
+            self.ozet.set_result(res)
+            self.fiziko.set_result(res)
+            self.ikincil.set_result(res)
+            self.motif.set_result(res)
+        self.show_home()
+
     # ---------- sekmeler ----------
     def new_tab(self):
         i = self.tabbar.addTab("Yeni analiz")
+        self.tabbar.setTabData(i, None)
+        self.giris.clear()
         self.tabbar.setCurrentIndex(i)
+        self.refresh_for_tab()
 
     def close_tab(self, index):
         if self.tabbar.count() > 1:
             self.tabbar.removeTab(index)
+
+    # ---------- analiz ----------
+    def run_shortcut(self):
+        if self.stack.currentIndex() == self.page_index["giris"]:
+            self.giris.submit()
+
+    def import_fasta(self):
+        if self.current_result() is not None:
+            self.new_tab()
+        self.giris.open_file_dialog()
+
+    def on_analyze(self, kind, value):
+        if kind == "kimlik":
+            self.giris.show_error("Kimlikle sorgu henüz bağlı değil. Şimdilik diziyi yapıştırın.")
+            return
+        header, seq = analysis.parse_fasta(value)
+        try:
+            result = analysis.analyze(seq)
+        except analysis.AnalysisError as e:
+            self.giris.show_error(str(e))
+            return
+        accession, entry = analysis.describe(header)
+        label = accession if accession == entry else f"{accession} · {entry}"
+        info = {"accession": accession, "entry": entry, "label": label, "analysis": result, "seq": seq,
+                "ss": analysis.predict_secondary_structure(seq),
+                "motifs": analysis.scan_motifs(seq)}
+
+        i = self.tabbar.currentIndex()
+        self.tabbar.setTabData(i, info)
+        self.tabbar.setTabText(i, accession)
+        self.tabbar.updateGeometry()
+        self.status_left.setText("Durum: Analiz tamamlandı")
+        QTimer.singleShot(1500, lambda: self.status_left.setText("Durum: Hazır"))
+        self.refresh_for_tab()
+
+    def on_show_in_3d(self, start, end, motif_id):
+        """Motif sayfasındaki "3B yapıda göster". 3B sayfası yazılınca aralık oraya iletilecek."""
+        self.highlight_3d = (start, end, motif_id)
+        self.go("yapi3b")
 
     # ---------- tema ----------
     def set_theme(self, choice: str):
@@ -207,11 +308,10 @@ class MainWindow(QMainWindow):
             mode = choice
         self.theme_mode = mode
         QApplication.instance().setStyleSheet(theme.build_qss(mode))
-    
-        # ---------- analiz (şimdilik sahte, API sonra bağlanacak) ----------
-    def on_analyze(self, kind, value):
-        self.status_left.setText("Durum: Analiz ediliyor…")
-        QTimer.singleShot(1200, lambda: self.status_left.setText("Durum: Hazır"))
+        self.ozet.apply_theme(mode)
+        self.fiziko.apply_theme(mode)
+        self.ikincil.apply_theme(mode)
+        self.motif.apply_theme(mode)
 
     # ---------- sürükle-bırak: pencerenin her yerine ----------
     @staticmethod
@@ -233,7 +333,8 @@ class MainWindow(QMainWindow):
         self.giris.set_drag(False)
         path = self._first_local_file(event)
         if path:
-            self.stack.setCurrentIndex(0)
-            self.nav_buttons["giris"].setChecked(True)
+            if self.current_result() is not None:
+                self.new_tab()  # sonuçlu sekmenin üstüne yazma
+            self.go("giris")
             self.giris.load_file(path)
             event.acceptProposedAction()

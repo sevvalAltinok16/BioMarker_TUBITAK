@@ -230,6 +230,17 @@ class GirisPage(QWidget):
         self.stack.setCurrentIndex(0)
         self.seq_edit.setPlainText(text.strip())
 
+    def show_error(self, text):
+        self._show_message(text)
+
+    def clear(self):
+        self.seq_edit.clear()
+        self.id_edit.clear()
+        self.pill_group.button(0).setChecked(True)
+        self.stack.setCurrentIndex(0)
+        self.drop_label.setText(".fasta, .txt veya .pdb dosyasını buraya bırakın")
+        self._clear_message()
+
     def set_drag(self, on: bool):
         self.dropzone.setProperty("drag", on)
         _repolish(self.dropzone)
