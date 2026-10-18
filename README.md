@@ -22,9 +22,6 @@ BioMarker aims to consolidate all these analyses into a single open-source platf
 * \[ ] **Phase 7 (Week 16-18):** 3D structure visualization (NGLviewer) integration
 * \[ ] **Phase 8 (Week 19-24):** Performance testing, documentation, packaging
 
-## Repo Structre
-
-
 ## Repo Structure
 
 ```text
@@ -40,7 +37,6 @@ biomarker/
 ├── tests/ # Unit tests
 └── notebooks/ # Exploratory data analysis
 ```
-
 
 ## Technologies Used
 
