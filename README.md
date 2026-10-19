@@ -15,8 +15,8 @@ BioMarker aims to consolidate all these analyses into a single open-source platf
 * \[x] **Phase 0 — Pilot Veri Seti:** Metadata for 20 proteins, FASTA, selection criteria, and the source manifest have been completed.
 * \[x] **Phase 1 (Week 1-2):** Literature review and technological infrastructure research
 * \[x] **Phase 2 (Week 3-4):** Physicochemical profile + Hydropathy modules
-* \[ ] **Phase 3 (Week 5-6):** Chou-Fasman secondary structure estimation
-* \[ ] **Phase 4 (Week 7-9):** PyQt5 graphical user interface (GUI)
+* \[x] **Phase 3 (Week 5-6):** Chou-Fasman secondary structure estimation
+* \[x] **Phase 4 (Week 7-9):** PyQt5 graphical user interface (GUI)
 * \[ ] **Phase 5 (Week 10-12):** Motif scanning (PROSITE) + BLAST homology analysis
 * \[ ] **Phase 6 (Week 13-15):** Interactive visualization (Plotly) + PDF reporting
 * \[ ] **Phase 7 (Week 16-18):** 3D structure visualization (NGLviewer) integration
