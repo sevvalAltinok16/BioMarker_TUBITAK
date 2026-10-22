@@ -8,12 +8,6 @@ import theme
 
 SS_COLORS = {"h": theme.COMMON["helix"], "s": theme.COMMON["sheet"], "t": theme.COMMON["turn"]}
 
-# ÖRNEK VERİ: motif taraması yazılınca gerçek sonuçla değişecek
-SAMPLE_MOTIFS = [
-    ("PS00262", "İnsülin ailesi imzası", "95–109"),
-    ("PS00005", "PKC fosforilasyon bölgesi", "51–53, 54–56"),
-    ("PS00006", "CK2 fosforilasyon bölgesi", "54–57"),
-]
 
 
 def tr_num(x: float, decimals: int, sign: bool = False) -> str:
@@ -189,28 +183,47 @@ class OzetPage(QWidget):
 
     def _build_motif_card(self):
         card, lay = self._card("Motifler", "motif")
-        for pid, desc, rng in SAMPLE_MOTIFS:
+        self.motif_rows = QVBoxLayout()
+        self.motif_rows.setSpacing(0)
+        lay.addLayout(self.motif_rows)
+        lay.addStretch(1)
+        return card
+
+    def _fill_motifs(self, motifs):
+        while self.motif_rows.count():
+            w = self.motif_rows.takeAt(0).widget()
+            if w:
+                w.setParent(None)
+                w.deleteLater()
+        groups = {}
+        for m in motifs:
+            g = groups.setdefault(m["id"], {"name": m["name"], "ranges": []})
+            g["ranges"].append(f"{m['start']}–{m['end']}")
+        if not groups:
+            none = QLabel("Motif bulunamadı.")
+            none.setObjectName("muted")
+            self.motif_rows.addWidget(none)
+            return
+        for mid, g in groups.items():
             sep = QFrame()
             sep.setObjectName("sep")
             sep.setFixedHeight(1)
-            lay.addWidget(sep)
-            row = QHBoxLayout()
-            row.setContentsMargins(0, 4, 0, 4)
+            self.motif_rows.addWidget(sep)
+            row = QWidget()
+            rl = QHBoxLayout(row)
+            rl.setContentsMargins(0, 6, 0, 6)
             col = QVBoxLayout()
             col.setSpacing(0)
-            a = QLabel(pid)
+            a = QLabel(mid)
             a.setObjectName("cardTitle")
-            b = QLabel(desc)
+            b = QLabel(g["name"])
             b.setObjectName("muted")
             col.addWidget(a)
             col.addWidget(b)
-            r = QLabel(rng)
-            row.addLayout(col)
-            row.addStretch(1)
-            row.addWidget(r)
-            lay.addLayout(row)
-        lay.addStretch(1)
-        return card
+            rl.addLayout(col)
+            rl.addStretch(1)
+            rl.addWidget(QLabel(", ".join(g["ranges"])))
+            self.motif_rows.addWidget(row)
 
     # ---------- veri ve tema ----------
     def set_result(self, info: dict):
@@ -227,6 +240,7 @@ class OzetPage(QWidget):
         self.notes["stab"].setText("kararlı" if stable else "kararsız")
         self.notes["stab"].setStyleSheet(f"color:{t['success'] if stable else t['warning']};")
 
+        self._fill_motifs(info.get("motifs", []))
         n = max(a["length"], 1)
         self.band.set_segments(
             [((g["start"] - 1) / n, g["end"] / n, g["type"]) for g in info.get("ss", [])]

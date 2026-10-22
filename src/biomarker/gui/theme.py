@@ -82,6 +82,10 @@ def _check_icon_path() -> str:
 def build_qss(mode: str) -> str:
     t = tokens(mode)
     check = _check_icon_path()
+    from PyQt5.QtGui import QColor
+    er, wa = QColor(t['error']), QColor(t['warning'])
+    err_bg = f"rgba({er.red()}, {er.green()}, {er.blue()}, 40)"
+    warn_bg = f"rgba({wa.red()}, {wa.green()}, {wa.blue()}, 40)"
     return f"""
 * {{ font-size: 13px; }}
 QMainWindow, QWidget#workspace, QStackedWidget {{
@@ -156,12 +160,12 @@ QPushButton#chip {{
     border: 1px solid {t['border']}; border-radius: 10px; padding: 3px 12px;
 }}
 QPushButton#chip:hover {{ border-color: {t['primary']}; }}
-QPlainTextEdit#seqEdit, QLineEdit#idEdit {{
+QPlainTextEdit#seqEdit, QPlainTextEdit#noteEdit, QLineEdit#idEdit {{
     background: {t['bg']}; color: {t['text']};
     border: 1px solid {t['border']}; border-radius: 6px; padding: 8px;
     selection-background-color: {t['primary']}; selection-color: {t['primary_text']};
 }}
-QPlainTextEdit#seqEdit:focus, QLineEdit#idEdit:focus {{ border-color: {t['primary']}; }}
+QPlainTextEdit#seqEdit:focus, QPlainTextEdit#noteEdit:focus, QLineEdit#idEdit:focus {{ border-color: {t['primary']}; }}
 QFrame#dropzone {{
     background: transparent; border: 1px dashed {t['primary']}; border-radius: 8px;
 }}
@@ -211,11 +215,31 @@ QTableWidget {{
     selection-background-color: {t['pill_on']}; selection-color: {t['pill_on_text']};
 }}
 QTableWidget::item {{ padding: 0 8px; border-bottom: 1px solid {t['border']}; }}
+QTableWidget::item:selected,
+QTableWidget::item:selected:active,
+QTableWidget::item:selected:!active {{
+    background: {t['pill_on']}; color: {t['pill_on_text']};
+}}
 QHeaderView {{ background: transparent; }}
 QHeaderView::section {{
     background: transparent; color: {t['muted']}; border: none;
     border-bottom: 1px solid {t['border']}; padding: 0 8px; text-align: left;
 }}
+
+/* Homoloji ekranı */
+QLineEdit#paramEdit {{
+    background: {t['bg']}; color: {t['text']};
+    border: 1px solid {t['border']}; border-radius: 6px; padding: 4px 8px; min-height: 20px;
+}}
+QLineEdit#paramEdit:focus {{ border-color: {t['primary']}; }}
+QProgressBar {{ background: {t['border']}; border: none; border-radius: 2px; max-height: 4px; }}
+QProgressBar::chunk {{ background: {t['primary']}; border-radius: 2px; }}
+QFrame#emptybox {{ background: transparent; border: 1px dashed {t['border']}; border-radius: 8px; }}
+QFrame#errorbox {{ background: {err_bg}; border: 1px solid {t['error']}; border-radius: 8px; }}
+QFrame#warnbox {{ background: {warn_bg}; border: 1px solid {t['warning']}; border-radius: 8px; }}
+QLabel#errorText {{ color: {t['error']}; }}
+QLabel#warnText {{ color: {t['warning']}; }}
+QLabel#okText {{ color: {t['success']}; font-weight: 500; }}
 
 /* Durum çubuğu */
 QStatusBar {{ background: {t['sidebar_bg']}; color: {t['sidebar_text']}; }}

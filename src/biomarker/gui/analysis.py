@@ -144,11 +144,75 @@ def scan_motifs(seq: str):
 # ---------------------------------------------------------------------------
 # 4) Homoloji (NCBI BLAST API)  ->  Homoloji sayfası
 # ---------------------------------------------------------------------------
-# def run_blast(seq, database="Swiss-Prot", program="blastp", evalue=0.001, max_hits=50):
-#     """BURAYA GELECEK: NCBI BLAST isteği (uzun sürer, iptal ve zaman aşımı gerekir).
-#     Döndürülecek: [{"accession": "P01315", "species": "Sus scrofa", "score": 214,
-#                     "evalue": 2e-75, "identity": 96, "coverage": 100,
-#                     "query_range": (25, 54), "alignment": (...)}, ...]"""
+def is_online() -> bool:
+    """
+    BURAYA GELECEK: NCBI BLAST sunucusuna ulaşılabiliyor mu?
+    Çevrimdışıysa False döndür; arayüz Homoloji sayfasında "İnternet bağlantısı gerekiyor"
+    uyarısını gösterir ve düğmeyi kapatır. Hızlı dönmeli (birkaç yüz ms).
+    Şimdilik her zaman True.
+    """
+    return True
+
+
+def run_blast(seq: str, database: str = "Swiss-Prot", program: str = "blastp",
+              evalue: float = 0.001, max_hits: int = 50):
+    """
+    BURAYA GELECEK: NCBI BLAST isteği. Dakikalar sürebilir.
+    Arayüz bu fonksiyonu ARKA PLAN İŞ PARÇACIĞINDA çağırır, yani içinde beklemek
+    (bloklamak) sorun değil. İptal arayüz tarafında yapılır.
+    Hata durumları:
+      - sunucu yanıt vermezse   : raise TimeoutError
+      - kullanıcıya gösterilecek tek cümlelik hata: raise AnalysisError("...")
+      - diğer her istisna arayüzde genel bir "başarısız oldu" mesajına çevrilir
+    Döndürülecek: sonuç listesi (arayüz skora göre sıralar), her sonuç bir sözlük:
+        {"accession": "P01315", "species": "Sus scrofa", "score": 214,
+         "evalue": 2e-75, "identity": 96, "coverage": 100,
+         "alignment": {"query_start": 25, "query_end": 54,
+                       "subject_start": 25, "subject_end": 54,
+                       "query":   "FVNQHLCGSHLVEALYLVCGERGFFYTPKT",
+                       "match":   "|||||||||||||||||||||||||||||| ",
+                       "subject": "FVNQHLCGSHLVEALYLVCGERGFFYTPKA"}}
+    Eşleşme yoksa boş liste döndür.
+    Şimdilik 3 saniye bekleyip ÖRNEK sonuçlar döndürüyor.
+    Denemek için (yalnızca geliştirme): BIOMARKER_DEMO_BLAST=timeout ortam değişkeni
+    zaman aşımı hatası, =error ise genel hata üretir.
+    """
+    import os
+    import time
+    time.sleep(3)  # ÖRNEK: gerçek istek çok daha uzun sürer
+    demo = os.environ.get("BIOMARKER_DEMO_BLAST", "")
+    if demo == "timeout":
+        raise TimeoutError("BLAST sunucusu yanıt vermedi.")
+    if demo == "error":
+        raise RuntimeError("örnek hata")
+
+    if len(seq) >= 54:
+        q, qs = seq[24:54], 25
+    else:
+        q, qs = seq, 1
+    qe = qs + len(q) - 1
+    rows = [
+        ("P01315", "Sus scrofa", 214, 2e-75, 96, 100),
+        ("P01321", "Canis lupus", 214, 2e-75, 96, 100),
+        ("P01317", "Bos taurus", 198, 4e-69, 91, 100),
+        ("P01325", "Mus musculus", 172, 6e-59, 82, 97),
+    ]
+    out = []
+    for i, (acc, sp, sc, ev, idn, cov) in enumerate(rows):
+        subj = list(q)
+        for k in range(i + 1):  # ÖRNEK: her satırda biraz farklı hizalama
+            pos = len(subj) - 1 - k * 4
+            if pos >= 0:
+                subj[pos] = "A" if subj[pos] != "A" else "G"
+        subj = "".join(subj)
+        match = "".join("|" if a == b else " " for a, b in zip(q, subj))
+        out.append({
+            "accession": acc, "species": sp, "score": sc, "evalue": ev,
+            "identity": idn, "coverage": cov,
+            "alignment": {"query_start": qs, "query_end": qe, "subject_start": qs,
+                          "subject_end": qe, "query": q, "match": match, "subject": subj},
+        })
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -188,3 +252,50 @@ def aa_composition(seq: str):
     vals = [8.2, 5.5, 1.8, 5.5, 3.6, 8.2, 1.8, 2.7, 2.7, 15.5,
             0.9, 1.8, 4.5, 4.5, 3.6, 4.5, 3.6, 4.5, 0.9, 2.7]
     return dict(zip("ACDEFGHIKLMNPQRSTVWY", vals))
+
+
+# ---------------------------------------------------------------------------
+# PDF rapor  ->  Raporlar sayfası ("PDF rapor al", Ctrl+E)
+# ---------------------------------------------------------------------------
+def create_pdf_report(info: dict, sections: list, title: str, note: str, path: str):
+    """
+    BURAYA GELECEK: gerçek PDF raporu (örn. reportlab ile) path konumuna yazılacak.
+      info     : sekmenin analiz sonucu. Anahtarlar: accession, entry, label, seq,
+                 analysis (analyze sonucu), ss (ikincil yapı), motifs, blast
+                 (blast["hits"] listesi, yoksa None), report_hits (Homoloji sayfasında
+                 "Rapora ekle" ile işaretlenen erişim numaraları)
+      sections : dahil edilecek bölümler, sırayla: "ozet", "fizikokimya", "ikincil",
+                 "motif", "homoloji"
+      title    : kullanıcının yazdığı başlık
+      note     : kullanıcının yazdığı not (boş olabilir)
+    Başarısızlıkta tek cümlelik AnalysisError fırlat, arayüz bunu gösterir.
+    Şimdilik içinde bir satır yazı olan YER TUTUCU bir PDF yazıyor.
+    """
+    def ascii_text(t):
+        table = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU")
+        t = t.translate(table).encode("ascii", "replace").decode("ascii")
+        return t.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+    lines = [ascii_text(title or "BioMarker raporu"), "(yer tutucu rapor)",
+             "Bolumler: " + ", ".join(sections)]
+    stream = "BT /F1 14 Tf 72 780 Td 18 TL " + " ".join(f"({ln}) Tj T*" for ln in lines) + " ET"
+    stream = stream.encode("ascii")
+    objs = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R "
+        b"/Resources << /Font << /F1 5 0 R >> >> >>",
+        b"<< /Length %d >>\nstream\n" % len(stream) + stream + b"\nendstream",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out, offsets = b"%PDF-1.4\n", []
+    for i, o in enumerate(objs, 1):
+        offsets.append(len(out))
+        out += b"%d 0 obj\n" % i + o + b"\nendobj\n"
+    xref = len(out)
+    out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objs) + 1)
+    for off in offsets:
+        out += b"%010d 00000 n \n" % off
+    out += b"trailer\n<< /Size %d /Root 1 0 R >>\nstartxref\n%d\n%%%%EOF" % (len(objs) + 1, xref)
+    with open(path, "wb") as f:
+        f.write(out)

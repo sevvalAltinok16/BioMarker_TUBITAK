@@ -10,9 +10,11 @@ import analysis
 import theme
 from fiziko_page import FizikoPage
 from giris_page import GirisPage
+from homoloji_page import HomolojiPage
 from ikincil_page import IkincilPage
 from motif_page import MotifPage
 from ozet_page import OzetPage
+from raporlar_page import RaporlarPage
 
 # (anahtar, etiket, analiz gerektirir mi)
 NAV_ITEMS = [
@@ -52,6 +54,8 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
         self.theme_mode = "dark"
         self.theme_choice = "system"
+        self.tab_infos = {}   # sekme kimliği -> analiz sonucu
+        self._next_tab_id = 1
 
         self._build_menu()
         self._build_body()
@@ -67,7 +71,7 @@ class MainWindow(QMainWindow):
         self._action(m_file, "Yeni analiz", "Ctrl+N", self.new_tab)
         self._action(m_file, "FASTA içe aktar", "Ctrl+O", self.import_fasta)
         self._action(m_file, "Projeyi kaydet", "Ctrl+S")
-        self._action(m_file, "Raporu dışa aktar", "Ctrl+E")
+        self._action(m_file, "Raporu dışa aktar", "Ctrl+E", self.export_report)
 
         m_edit = mb.addMenu("Düzen")
         self._action(m_edit, "Diziyi kopyala")
@@ -140,6 +144,13 @@ class MainWindow(QMainWindow):
                 self.giris = GirisPage()
                 self.giris.analyze_requested.connect(self.on_analyze)
                 page = self.giris
+            elif key == "raporlar":
+                self.raporlar = RaporlarPage()
+                page = self.raporlar
+            elif key == "homoloji":
+                self.homoloji = HomolojiPage()
+                self.homoloji.state_changed.connect(self.on_blast_state)
+                page = self.homoloji
             elif key == "motif":
                 self.motif = MotifPage()
                 self.motif.show_in_3d.connect(self.on_show_in_3d)
@@ -157,6 +168,8 @@ class MainWindow(QMainWindow):
         self.ozet = OzetPage()
         self.ozet.navigate.connect(self.go)
         self.page_index["ozet"] = self.stack.addWidget(self.ozet)
+
+        self.stack.currentChanged.connect(self._update_status_right)
 
         body = QHBoxLayout()
         body.setContentsMargins(0, 0, 0, 0)
@@ -223,7 +236,9 @@ class MainWindow(QMainWindow):
 
     def current_result(self):
         i = self.tabbar.currentIndex()
-        return self.tabbar.tabData(i) if i >= 0 else None
+        if i < 0:
+            return None
+        return self.tab_infos.get(self.tabbar.tabData(i))
 
     def show_home(self):
         """Analiz yoksa Giriş, varsa Özet."""
@@ -240,24 +255,47 @@ class MainWindow(QMainWindow):
         self.nav_buttons["giris"].setText("Özet" if has else "Giriş")
         for key in self.needs_analysis:
             self.nav_buttons[key].setEnabled(has)
+        self.raporlar.set_result(res)
         if has:
             self.ozet.set_result(res)
             self.fiziko.set_result(res)
             self.ikincil.set_result(res)
             self.motif.set_result(res)
+            self.homoloji.set_result(res)
         self.show_home()
 
     # ---------- sekmeler ----------
     def new_tab(self):
         i = self.tabbar.addTab("Yeni analiz")
-        self.tabbar.setTabData(i, None)
+        self.tabbar.setTabData(i, self._next_tab_id)
+        self._next_tab_id += 1
         self.giris.clear()
         self.tabbar.setCurrentIndex(i)
         self.refresh_for_tab()
 
     def close_tab(self, index):
         if self.tabbar.count() > 1:
+            self.tab_infos.pop(self.tabbar.tabData(index), None)
             self.tabbar.removeTab(index)
+
+    # ---------- durum çubuğu metinleri ----------
+    def _update_status_right(self, index):
+        if index == self.page_index["raporlar"]:
+            self.raporlar.refresh()
+        if index == self.page_index["homoloji"]:
+            self.homoloji.refresh_connection()
+            ok = analysis.is_online()
+            self.status_right.setText("NCBI BLAST bağlantısı: " + ("açık" if ok else "kapalı"))
+        else:
+            self.status_right.setText("Çevrimdışı analiz: açık")
+
+    def on_blast_state(self, state):
+        self.status_left.setText({"running": "Durum: Analiz ediliyor…", "error": "Durum: Hata"}.get(state, "Durum: Hazır"))
+
+    def export_report(self):
+        """Ctrl+E: Raporlar sayfasına geç ve PDF raporu al."""
+        self.go("raporlar")
+        self.raporlar.export_pdf()
 
     # ---------- analiz ----------
     def run_shortcut(self):
@@ -286,7 +324,7 @@ class MainWindow(QMainWindow):
                 "motifs": analysis.scan_motifs(seq)}
 
         i = self.tabbar.currentIndex()
-        self.tabbar.setTabData(i, info)
+        self.tab_infos[self.tabbar.tabData(i)] = info
         self.tabbar.setTabText(i, accession)
         self.tabbar.updateGeometry()
         self.status_left.setText("Durum: Analiz tamamlandı")
