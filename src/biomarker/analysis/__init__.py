@@ -22,3 +22,19 @@ from .secondary import (  # noqa: F401,E402
     secondary_structure_string,
     structure_summary,
 )
+from .motifs import (  # noqa: F401,E402
+    MotifDatabaseError,
+    database_info,
+    prosite_to_regex,
+    scan_motifs,
+)
+from .blast import (  # noqa: F401,E402
+    BlastCancelled,
+    BlastConnectionError,
+    BlastError,
+    BlastServerError,
+    BlastTimeout,
+    format_alignment,
+    parse_blast_xml,
+    run_blast,
+)
