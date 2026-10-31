@@ -28,7 +28,7 @@ from .motifs import (  # noqa: F401,E402
     prosite_to_regex,
     scan_motifs,
 )
-from .blast import (  # noqa: F401,E402
+from .homology import (  # noqa: F401,E402
     BlastCancelled,
     BlastConnectionError,
     BlastError,
